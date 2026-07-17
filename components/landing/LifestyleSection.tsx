@@ -1,5 +1,6 @@
 import Image from "next/image";
 import CheckoutButton from "@/components/CheckoutButton";
+import LastSpotsBadge from "@/components/landing/LastSpotsBadge";
 
 const CARDS = [
   {
@@ -40,6 +41,9 @@ export default function LifestyleSection() {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/40 to-transparent" />
+              <div className="absolute top-4 left-4">
+                <LastSpotsBadge className="bg-navy/80 backdrop-blur-sm" />
+              </div>
               <div className="absolute bottom-0 left-0 right-0 p-5">
                 <p className="text-gold text-xs font-semibold uppercase tracking-wide mb-1">
                   {card.subtitle}

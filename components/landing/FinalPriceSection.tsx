@@ -1,5 +1,6 @@
 import Image from "next/image";
 import CheckoutButton from "@/components/CheckoutButton";
+import LastSpotsBadge from "@/components/landing/LastSpotsBadge";
 
 const INCLUDES = [
   "Ebook completo 62 páginas",
@@ -27,9 +28,12 @@ export default function FinalPriceSection() {
         <p className="font-serif text-5xl font-bold text-gold mb-2">
           $9.999 ARS
         </p>
-        <p className="text-graylight text-sm mb-8">
+        <p className="text-graylight text-sm mb-4">
           Pago único · Acceso de por vida
         </p>
+        <div className="mb-8">
+          <LastSpotsBadge />
+        </div>
 
         <ul className="space-y-3 mb-10 text-left max-w-xs mx-auto">
           {INCLUDES.map((item) => (

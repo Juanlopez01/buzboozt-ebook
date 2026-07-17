@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { MercadoPagoConfig, Payment } from "mercadopago";
+import { createOrder, getOrderByPaymentId } from "@/lib/db";
+import { sendDeliveryEmail, sendAdminSaleNotification } from "@/lib/email";
 
 function isValidSignature(request: NextRequest, dataId: string): boolean {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -83,12 +85,40 @@ export async function POST(request: NextRequest) {
       payer_email: payment.payer?.email,
     });
 
-    // TODO: acá es donde hay que persistir la orden (base de datos) y
-    // disparar el envío del ebook por email cuando payment.status ===
-    // "approved". Este proyecto todavía no tiene DB ni servicio de email
-    // conectados — falta decidir cuál usar antes de completar esta parte.
+    const paymentId = String(payment.id);
+    const email = payment.payer?.email;
+    const payerName = [payment.payer?.first_name, payment.payer?.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    if (payment.status === "approved" && email) {
+      const existingOrder = await getOrderByPaymentId(paymentId);
+
+      if (!existingOrder) {
+        await createOrder({
+          paymentId,
+          email,
+          productType: payment.external_reference ?? "ebook",
+          amount: payment.transaction_amount ?? 0,
+          status: payment.status,
+          payerName: payerName || null,
+        });
+
+        await sendDeliveryEmail({
+          to: email,
+          productType: payment.external_reference ?? "ebook",
+        });
+
+        await sendAdminSaleNotification({
+          buyerEmail: email,
+          productType: payment.external_reference ?? "ebook",
+          amount: payment.transaction_amount ?? 0,
+        });
+      }
+    }
   } catch (error) {
-    console.error("Error consultando el pago en MercadoPago:", error);
+    console.error("Error procesando el pago del webhook:", error);
   }
 
   return NextResponse.json({ received: true }, { status: 200 });

@@ -10,14 +10,17 @@
     "optimize-images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "mercadopago": "^2.0.15",
     "next": "14.2.5",
+    "nodemailer": "^9.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",

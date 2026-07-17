@@ -31,6 +31,12 @@ integrado vía MercadoPago.
    MERCADOPAGO_WEBHOOK_SECRET=tu_clave_secreta_del_webhook
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    NEXT_PUBLIC_META_PIXEL_ID=tu_pixel_id_de_meta
+   DATABASE_URL=postgres://...
+   GMAIL_USER=tu_cuenta@gmail.com
+   GMAIL_APP_PASSWORD=tu_contraseña_de_aplicacion
+   ADMIN_NOTIFICATION_EMAIL=tu_cuenta@gmail.com
+   EBOOK_DOWNLOAD_URL=https://link-directo-al-pdf-del-ebook
+   NEXT_PUBLIC_WHATSAPP_URL=https://wa.me/5491122334455
    ```
 
    **Cómo conseguir el `MERCADOPAGO_ACCESS_TOKEN`:**
@@ -52,9 +58,50 @@ integrado vía MercadoPago.
       entrá a tu Pixel (o creá uno nuevo).
    2. El ID es el número que aparece arriba a la izquierda (ej. `1234567890123456`).
 
-   Si dejás `MERCADOPAGO_WEBHOOK_SECRET` o `NEXT_PUBLIC_META_PIXEL_ID` sin
-   completar, esas funciones quedan desactivadas sin romper el resto de la
-   página (el checkout y el resto del sitio siguen funcionando igual).
+   **Cómo conseguir el `DATABASE_URL` (Vercel Postgres / Neon):**
+   1. En tu proyecto en Vercel, andá a la pestaña **Storage** → **Create Database** → **Postgres**.
+   2. Vercel provisiona una base en Neon y la conecta sola a tu proyecto.
+   3. Para desarrollo local, corré `vercel env pull .env.local` (con el
+      [Vercel CLI](https://vercel.com/docs/cli)) para bajar la connection
+      string real a tu `.env.local` — así usás la misma base en local y en
+      producción, sin instalar Postgres localmente.
+
+   **Cómo conseguir `GMAIL_USER` y `GMAIL_APP_PASSWORD`:**
+
+   El envío de emails (entrega del ebook + aviso de venta) usa tu cuenta de
+   Gmail como servidor SMTP — no hace falta dominio propio.
+
+   1. Activá la verificación en dos pasos en tu cuenta de Google:
+      [myaccount.google.com/security](https://myaccount.google.com/security).
+   2. Andá a [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+   3. Generá una contraseña de aplicación (elegí "Otra" y ponele un nombre,
+      ej. "Buzboozt Web"). Te da un código de 16 caracteres — copialo como
+      `GMAIL_APP_PASSWORD` (sin espacios).
+   4. `GMAIL_USER` es tu dirección completa de Gmail.
+
+   Gmail permite hasta ~500 emails por día en cuentas gratuitas — de sobra
+   para el volumen inicial. Los emails van a salir desde tu propia
+   dirección (`tunombre@gmail.com`) en vez de un dominio propio; podés
+   migrar a un servicio como Resend con dominio verificado más adelante sin
+   tocar el resto del código, solo `lib/email.ts`.
+
+   **`ADMIN_NOTIFICATION_EMAIL`:** a dónde te llega el aviso de cada venta
+   nueva (nombre, producto, monto del comprador). Si no la definís, usa el
+   mismo `GMAIL_USER`.
+
+   **`EBOOK_DOWNLOAD_URL`:** el link directo de descarga del PDF final
+   (Drive, Dropbox, etc. — tiene que ser un link que descargue el archivo
+   directamente, no una carpeta).
+
+   **`NEXT_PUBLIC_WHATSAPP_URL`:** link tipo `https://wa.me/54911...` que
+   se usa en el botón de soporte de `/gracias` ("¿no te llegó el email?") y
+   en el CTA de la sección de Servicio Web. Si no la definís, ambos usan
+   `https://wa.me/543624804761` como fallback hardcodeado en el código.
+
+   Si dejás `MERCADOPAGO_WEBHOOK_SECRET`, `NEXT_PUBLIC_META_PIXEL_ID`,
+   `DATABASE_URL`, `GMAIL_USER`/`GMAIL_APP_PASSWORD` o `EBOOK_DOWNLOAD_URL`
+   sin completar, esas funciones quedan desactivadas sin romper el resto de
+   la página (el checkout y el resto del sitio siguen funcionando igual).
 
 3. Correr el servidor de desarrollo:
 
@@ -81,6 +128,20 @@ integrado vía MercadoPago.
   `app/layout.tsx`, dispara `PageView` en toda la página).
 - `components/PurchaseEvent.tsx` — dispara el evento `Purchase` en
   `/gracias`, una sola vez por pago (evita duplicados en refresh).
+- `lib/db.ts` — tabla `orders` (Postgres/Neon) y funciones para
+  registrar/consultar compras, con `payment_id` como clave para evitar
+  duplicados.
+- `lib/email.ts` — arma y envía (vía Gmail SMTP) el email de entrega del
+  ebook al comprador y el aviso de venta nueva al vendedor.
+- `components/landing/WebServiceSection.tsx` — sección de venta del
+  servicio de desarrollo web ($150.000), con CTA directo a WhatsApp (no
+  pasa por MercadoPago, es una venta por consulta).
+- `components/RecentPurchaseNotification.tsx` + `app/api/recent-orders/route.ts`
+  — widget flotante de "compra reciente" **basado 100% en ventas reales**
+  de la tabla `orders` (nunca en datos inventados). Si todavía no hubo
+  ninguna venta, no muestra nada — no rellena con ejemplos falsos.
+- `components/landing/LastSpotsBadge.tsx` — badge genérico de urgencia
+  ("Últimos cupos a este precio"), sin contador numérico inventado.
 
 ## Webhook de MercadoPago (confirmación de pago)
 
@@ -94,19 +155,28 @@ Ese endpoint:
 1. Verifica la firma de la notificación (con `MERCADOPAGO_WEBHOOK_SECRET`).
 2. Consulta el pago real contra la API de MercadoPago (nunca confía en los
    datos que vienen en la notificación sin verificar).
-3. Loguea el resultado (`id`, `status`, `external_reference`,
-   `transaction_amount`, `payer.email`).
+3. Si el pago está `approved` y todavía no existe una orden con ese
+   `payment_id` en la base (evita duplicados si MercadoPago reintenta el
+   webhook), guarda la orden y dispara el email de entrega.
 
-**Lo que falta decidir:** ahora mismo el webhook solo loguea el pago
-aprobado — no hay base de datos ni servicio de email conectados a este
-proyecto todavía. Para completar el flujo de entrega automática del ebook
-hay que:
-- Elegir dónde persistir las órdenes (ej. una tabla en Postgres/Supabase).
-- Elegir un servicio de email transaccional (ej. Resend, SendGrid) para
-  mandar el link de descarga automáticamente cuando `status === "approved"`.
+## Entrega automática del ebook
 
-Hasta que eso esté, la entrega del ebook depende de revisar los logs (o el
-propio panel de MercadoPago) y mandarlo manualmente.
+Cuando el webhook confirma un pago aprobado:
+1. Guarda la orden en la tabla `orders` (email, producto, monto, estado,
+   fecha) — esto permite auditar compras y resolver reclamos ("pagué y no
+   me llegó") buscando por email o `payment_id`.
+2. Manda (por Gmail SMTP) un email al comprador con el link de
+   `EBOOK_DOWNLOAD_URL` (`payment.payer.email`, que devuelve MercadoPago).
+3. Manda otro email a `ADMIN_NOTIFICATION_EMAIL` avisando la venta nueva
+   (producto, monto, email del comprador) — así te enterás al toque de
+   cada compra aunque no estés revisando el sitio.
+
+Si falta `DATABASE_URL`, `GMAIL_USER`/`GMAIL_APP_PASSWORD` o
+`EBOOK_DOWNLOAD_URL`, esa parte queda desactivada (se loguea el error pero
+no rompe el resto del webhook) y la entrega vuelve a depender de revisar
+los logs, el email de aviso al admin, o el panel de MercadoPago manualmente
+(por eso el botón de WhatsApp en `/gracias` sirve como red de contención:
+si el comprador no recibe nada, te escribe directo).
 
 ## Meta Pixel (tracking de conversión para ads)
 
@@ -133,8 +203,15 @@ modificar el objeto `PRODUCTS` en ese archivo.
 2. En [vercel.com](https://vercel.com), importar el repositorio.
 3. En **Project Settings → Environment Variables**, agregar:
    - `MERCADOPAGO_ACCESS_TOKEN`
+   - `MERCADOPAGO_WEBHOOK_SECRET`
    - `NEXT_PUBLIC_SITE_URL` (la URL de producción, ej.
      `https://tu-dominio.com`)
+   - `NEXT_PUBLIC_META_PIXEL_ID`
+   - `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ADMIN_NOTIFICATION_EMAIL`,
+     `EBOOK_DOWNLOAD_URL`
+   - `NEXT_PUBLIC_WHATSAPP_URL`
+   - `DATABASE_URL` (se completa sola si creás la base desde la pestaña
+     **Storage** del mismo proyecto en Vercel)
 4. Deploy. Vercel detecta automáticamente que es un proyecto Next.js.
 
 Importante: `NEXT_PUBLIC_SITE_URL` debe apuntar al dominio real de producción

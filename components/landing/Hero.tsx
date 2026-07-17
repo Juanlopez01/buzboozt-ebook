@@ -1,5 +1,6 @@
 import Image from "next/image";
 import CheckoutButton from "@/components/CheckoutButton";
+import LastSpotsBadge from "@/components/landing/LastSpotsBadge";
 
 export default function Hero() {
   return (
@@ -54,6 +55,10 @@ export default function Hero() {
             <span className="text-2xl">🎁</span>
             <span className="text-sm text-graylight">5 Bonuses incluidos</span>
           </div>
+        </div>
+
+        <div className="mb-4">
+          <LastSpotsBadge />
         </div>
 
         <CheckoutButton

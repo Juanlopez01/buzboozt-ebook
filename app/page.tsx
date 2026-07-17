@@ -7,11 +7,13 @@ import LearnSection from "@/components/landing/LearnSection";
 import PreviewSection from "@/components/landing/PreviewSection";
 import BonusesSection from "@/components/landing/BonusesSection";
 import UpsellSection from "@/components/landing/UpsellSection";
+import WebServiceSection from "@/components/landing/WebServiceSection";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FaqSection from "@/components/landing/FaqSection";
 import DeviceShowcaseSection from "@/components/landing/DeviceShowcaseSection";
 import FinalPriceSection from "@/components/landing/FinalPriceSection";
 import Footer from "@/components/landing/Footer";
+import RecentPurchaseNotification from "@/components/RecentPurchaseNotification";
 
 export default function Home() {
   return (
@@ -25,11 +27,13 @@ export default function Home() {
       <PreviewSection />
       <BonusesSection />
       <UpsellSection />
+      <WebServiceSection />
       <TestimonialsSection />
       <FaqSection />
       <DeviceShowcaseSection />
       <FinalPriceSection />
       <Footer />
+      <RecentPurchaseNotification />
     </>
   );
 }

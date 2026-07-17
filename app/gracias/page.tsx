@@ -65,6 +65,25 @@ export default async function GraciasPage({
           Si compraste la Auditoría Digital Personalizada, nos vamos a poner
           en contacto por WhatsApp para coordinar el horario de tu sesión.
         </p>
+
+        <div className="mb-8 rounded-xl border border-gold/20 bg-navy-medium p-6">
+          <p className="text-graylight text-sm mb-4">
+            ¿No te llegó el email en unos minutos? Escribinos y te lo
+            mandamos al toque.
+          </p>
+          <a
+            href={
+              process.env.NEXT_PUBLIC_WHATSAPP_URL ||
+              "https://wa.me/543624804761"
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border-2 border-gold px-6 py-2.5 font-sans font-semibold text-gold hover:bg-gold hover:text-navy transition"
+          >
+            Escribinos por WhatsApp
+          </a>
+        </div>
+
         <Link
           href="/"
           className="inline-block rounded-lg bg-gold px-8 py-3 font-sans font-semibold text-navy hover:opacity-90 transition"

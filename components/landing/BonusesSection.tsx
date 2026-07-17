@@ -1,5 +1,6 @@
 import Image from "next/image";
 import CheckoutButton from "@/components/CheckoutButton";
+import LastSpotsBadge from "@/components/landing/LastSpotsBadge";
 
 const BONUSES = [
   {
@@ -78,6 +79,9 @@ export default function BonusesSection() {
                 />
               </div>
               <div className="p-5">
+                <div className="mb-3">
+                  <LastSpotsBadge />
+                </div>
                 <span className="inline-block rounded-full bg-gold/10 px-3 py-1 text-xs font-semibold text-gold mb-3">
                   {bonus.label}
                 </span>
