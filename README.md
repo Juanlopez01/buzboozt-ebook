@@ -31,6 +31,7 @@ integrado vía MercadoPago.
    MERCADOPAGO_WEBHOOK_SECRET=tu_clave_secreta_del_webhook
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    NEXT_PUBLIC_META_PIXEL_ID=tu_pixel_id_de_meta
+   NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
    DATABASE_URL=postgres://...
    GMAIL_USER=tu_cuenta@gmail.com
    GMAIL_APP_PASSWORD=tu_contraseña_de_aplicacion
@@ -57,6 +58,11 @@ integrado vía MercadoPago.
    1. En [business.facebook.com/events_manager](https://business.facebook.com/events_manager),
       entrá a tu Pixel (o creá uno nuevo).
    2. El ID es el número que aparece arriba a la izquierda (ej. `1234567890123456`).
+
+   **Cómo conseguir el `NEXT_PUBLIC_GA_MEASUREMENT_ID`:**
+   1. En [analytics.google.com](https://analytics.google.com), creá una
+      propiedad GA4 (o usá una existente).
+   2. Admin → **Flujos de datos** → tu flujo web → el ID empieza con `G-`.
 
    **Cómo conseguir el `DATABASE_URL` (Vercel Postgres / Neon):**
    1. En tu proyecto en Vercel, andá a la pestaña **Storage** → **Create Database** → **Postgres**.
@@ -187,6 +193,16 @@ en los parámetros de la URL, que un usuario podría manipular). El monto
 enviado al pixel es el monto real cobrado, no el que se muestra en el
 frontend.
 
+## Google Analytics 4
+
+Con `NEXT_PUBLIC_GA_MEASUREMENT_ID` configurado, se carga
+`@next/third-parties/google` (`<GoogleAnalytics />`) en `app/layout.tsx` —
+el paquete oficial de Next.js para gtag.js, optimizado para no bloquear el
+render. Trackea `page_view` automáticamente en toda la página y, en
+`/gracias`, `components/PurchaseEvent.tsx` dispara un evento `purchase` de
+GA4 con el mismo monto verificado server-side que usa Meta Pixel (mismo
+componente, misma fuente de datos, sin duplicar lógica de verificación).
+
 ## Productos configurados
 
 | tipo               | Producto                                  | Precio (ARS) |
@@ -207,6 +223,7 @@ modificar el objeto `PRODUCTS` en ese archivo.
    - `NEXT_PUBLIC_SITE_URL` (la URL de producción, ej.
      `https://tu-dominio.com`)
    - `NEXT_PUBLIC_META_PIXEL_ID`
+   - `NEXT_PUBLIC_GA_MEASUREMENT_ID`
    - `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `ADMIN_NOTIFICATION_EMAIL`,
      `EBOOK_DOWNLOAD_URL`
    - `NEXT_PUBLIC_WHATSAPP_URL`

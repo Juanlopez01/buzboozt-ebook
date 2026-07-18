@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { sendGAEvent } from "@next/third-parties/google";
 
 declare global {
   interface Window {
@@ -20,17 +21,25 @@ export default function PurchaseEvent({
   eventId,
 }: PurchaseEventProps) {
   useEffect(() => {
-    const alreadyFiredKey = `purchase_fired_${eventId}`;
-    if (sessionStorage.getItem(alreadyFiredKey)) return;
-
-    if (typeof window.fbq === "function") {
+    const metaFiredKey = `purchase_fired_meta_${eventId}`;
+    if (!sessionStorage.getItem(metaFiredKey) && typeof window.fbq === "function") {
       window.fbq(
         "track",
         "Purchase",
         { value, currency },
         { eventID: eventId }
       );
-      sessionStorage.setItem(alreadyFiredKey, "1");
+      sessionStorage.setItem(metaFiredKey, "1");
+    }
+
+    const gaFiredKey = `purchase_fired_ga_${eventId}`;
+    if (!sessionStorage.getItem(gaFiredKey)) {
+      sendGAEvent("event", "purchase", {
+        transaction_id: eventId,
+        value,
+        currency,
+      });
+      sessionStorage.setItem(gaFiredKey, "1");
     }
   }, [value, currency, eventId]);
 

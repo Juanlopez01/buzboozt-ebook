@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import MetaPixel from "@/components/MetaPixel";
 import "./globals.css";
 
@@ -49,6 +50,9 @@ export default function RootLayout({
       <body className="font-sans bg-navy text-white antialiased">
         <MetaPixel />
         {children}
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
       </body>
     </html>
   );
