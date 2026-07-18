@@ -18,7 +18,7 @@ export default function Footer() {
           </a>
         </nav>
 
-        <p className="text-sm text-graylight">contacto@buzboozt.com</p>
+        <p className="text-sm text-graylight">buzboozt@gmail.com</p>
 
         <p className="text-xs text-graylight">
           © 2026 Buzboozt. Todos los derechos reservados.
