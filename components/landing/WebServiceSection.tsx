@@ -1,4 +1,4 @@
-import Image from "next/image";
+import AdminDemo from "@/components/AdminDemo";
 
 const INCLUDES = [
   "Diseño 100% a medida para tu consultorio",
@@ -37,15 +37,12 @@ export default function WebServiceSection() {
           </p>
         </div>
 
-        <div className="relative w-full aspect-video mb-10 rounded-xl overflow-hidden border border-gold/20">
-          <Image
-            src="/webservice-video-placeholder.jpg"
-            alt="Video de la app (próximamente)"
-            fill
-            sizes="(min-width: 768px) 700px, 100vw"
-            className="object-cover"
-          />
+        <div className="w-full h-[440px] sm:h-[480px] md:h-[560px] mb-3 rounded-xl overflow-hidden border border-gold/20">
+          <AdminDemo />
         </div>
+        <p className="text-graylight text-xs text-center mb-10">
+          Demo interactiva — datos ficticios de ejemplo, no son pacientes reales.
+        </p>
 
         <ul className="space-y-3 mb-10 max-w-md mx-auto">
           {INCLUDES.map((item) => (
