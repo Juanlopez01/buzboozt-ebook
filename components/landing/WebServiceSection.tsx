@@ -21,7 +21,7 @@ export default function WebServiceSection() {
 
   return (
     <section className="px-6 py-20 fade-in-section">
-      <div className="mx-auto max-w-3xl rounded-2xl bg-navy-medium border border-gold p-8 md:p-12">
+      <div className="mx-auto max-w-3xl rounded-2xl bg-navy-medium border border-gold p-5 sm:p-8 md:p-12">
         <div className="text-center mb-10">
           <span className="inline-block rounded-full bg-gold/10 px-4 py-1.5 text-xs font-semibold text-gold mb-6">
             SERVICIO PREMIUM
@@ -37,7 +37,7 @@ export default function WebServiceSection() {
           </p>
         </div>
 
-        <div className="w-full h-[440px] sm:h-[480px] md:h-[560px] mb-3 rounded-xl overflow-hidden border border-gold/20">
+        <div className="-mx-5 sm:-mx-8 md:-mx-12 h-[440px] sm:h-[480px] md:h-[560px] mb-3 rounded-xl overflow-hidden border border-gold/20">
           <AdminDemo />
         </div>
         <p className="text-graylight text-xs text-center mb-10">

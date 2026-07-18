@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 type View = "turnos" | "pacientes" | "historial" | "agenda" | "ficha";
 type ToothState = "sano" | "tratado" | "pendiente";
+type Specialty = "odontologia" | "medicina" | "kinesiologia" | "nutricion";
 
 interface Patient {
   id: number;
@@ -12,7 +13,6 @@ interface Patient {
   lastVisit: string;
   phone: string;
   dni: string;
-  notes: string;
 }
 
 interface Appointment {
@@ -48,17 +48,70 @@ const NAV_ITEMS: { id: View; label: string; icon: string }[] = [
   { id: "agenda", label: "Agenda", icon: "🗓️" },
 ];
 
+const SPECIALTIES: { id: Specialty; label: string }[] = [
+  { id: "odontologia", label: "Odontología" },
+  { id: "medicina", label: "Medicina Clínica" },
+  { id: "kinesiologia", label: "Kinesiología" },
+  { id: "nutricion", label: "Nutrición" },
+];
+
 // Todos los nombres, turnos y datos de esta demo son ficticios —
 // no representan pacientes reales.
 const PATIENTS: Patient[] = [
-  { id: 1, name: "Martina Ibáñez", initials: "MI", lastVisit: "12/06/2026", phone: "••• •••• 4521", dni: "••.•••.•••", notes: "Control de rutina cada 6 meses." },
-  { id: 2, name: "Tomás Duarte", initials: "TD", lastVisit: "03/05/2026", phone: "••• •••• 7788", dni: "••.•••.•••", notes: "Tratamiento de conducto en pieza 26." },
-  { id: 3, name: "Sofía Ramírez", initials: "SR", lastVisit: "28/04/2026", phone: "••• •••• 1092", dni: "••.•••.•••", notes: "Alergia a la penicilina." },
-  { id: 4, name: "Lucas Fernández", initials: "LF", lastVisit: "15/04/2026", phone: "••• •••• 3345", dni: "••.•••.•••", notes: "Ortodoncia en curso." },
-  { id: 5, name: "Valentina Gómez", initials: "VG", lastVisit: "02/04/2026", phone: "••• •••• 9012", dni: "••.•••.•••", notes: "Primera consulta." },
-  { id: 6, name: "Agustín Rojas", initials: "AR", lastVisit: "20/03/2026", phone: "••• •••• 5567", dni: "••.•••.•••", notes: "Blanqueamiento realizado." },
-  { id: 7, name: "Camila Torres", initials: "CT", lastVisit: "08/03/2026", phone: "••• •••• 2234", dni: "••.•••.•••", notes: "Sensibilidad en pieza 14." },
+  { id: 1, name: "Martina Ibáñez", initials: "MI", lastVisit: "12/06/2026", phone: "••• •••• 4521", dni: "••.•••.•••" },
+  { id: 2, name: "Tomás Duarte", initials: "TD", lastVisit: "03/05/2026", phone: "••• •••• 7788", dni: "••.•••.•••" },
+  { id: 3, name: "Sofía Ramírez", initials: "SR", lastVisit: "28/04/2026", phone: "••• •••• 1092", dni: "••.•••.•••" },
+  { id: 4, name: "Lucas Fernández", initials: "LF", lastVisit: "15/04/2026", phone: "••• •••• 3345", dni: "••.•••.•••" },
+  { id: 5, name: "Valentina Gómez", initials: "VG", lastVisit: "02/04/2026", phone: "••• •••• 9012", dni: "••.•••.•••" },
+  { id: 6, name: "Agustín Rojas", initials: "AR", lastVisit: "20/03/2026", phone: "••• •••• 5567", dni: "••.•••.•••" },
+  { id: 7, name: "Camila Torres", initials: "CT", lastVisit: "08/03/2026", phone: "••• •••• 2234", dni: "••.•••.•••" },
 ];
+
+const SPECIALTY_NOTES: Record<Specialty, string[]> = {
+  odontologia: [
+    "Control de rutina cada 6 meses.",
+    "Tratamiento de conducto en pieza 26.",
+    "Alergia a la penicilina.",
+    "Ortodoncia en curso.",
+    "Primera consulta.",
+    "Blanqueamiento realizado.",
+    "Sensibilidad en pieza 14.",
+  ],
+  medicina: [
+    "Control de presión arterial mensual.",
+    "Seguimiento post-operatorio.",
+    "Alergia a la penicilina.",
+    "Chequeo general anual.",
+    "Primera consulta.",
+    "Estudios de rutina al día.",
+    "Consulta por dolor recurrente.",
+  ],
+  kinesiologia: [
+    "Rehabilitación de hombro, sesión 4 de 10.",
+    "Alta médica en dos semanas.",
+    "Alergia a la penicilina.",
+    "Tratamiento de lumbalgia.",
+    "Primera consulta.",
+    "Recuperación post esguince de tobillo.",
+    "Dolor cervical en seguimiento.",
+  ],
+  nutricion: [
+    "Plan de descenso, control quincenal.",
+    "Seguimiento de plan deportivo.",
+    "Alergia a la penicilina.",
+    "Plan de aumento de masa muscular.",
+    "Primera consulta.",
+    "Mantenimiento de peso objetivo.",
+    "Ajuste de plan por intolerancia.",
+  ],
+};
+
+const SPECIALTY_WIDGET_LABEL: Record<Specialty, string> = {
+  odontologia: "Odontograma",
+  medicina: "Signos vitales",
+  kinesiologia: "Diagrama corporal",
+  nutricion: "Seguimiento nutricional",
+};
 
 const TODAY_APPOINTMENTS: Appointment[] = [
   { id: 1, time: "09:00", patient: "Martina I.", type: "Control", status: "confirmado" },
@@ -165,10 +218,20 @@ function Odontogram() {
 
   return (
     <div>
-      <svg viewBox="0 0 640 140" className="w-full h-auto">
-        {renderRow(TOOTH_NUMBERS_UPPER, 30)}
-        {renderRow(TOOTH_NUMBERS_LOWER, 100)}
-      </svg>
+      <div className="overflow-x-auto -mx-1 px-1">
+        <svg
+          viewBox="0 0 640 140"
+          width={640}
+          height={140}
+          className="h-auto flex-shrink-0"
+        >
+          {renderRow(TOOTH_NUMBERS_UPPER, 30)}
+          {renderRow(TOOTH_NUMBERS_LOWER, 100)}
+        </svg>
+      </div>
+      <p className="mt-1.5 text-[10px] text-white/30">
+        Deslizá para ver todas las piezas →
+      </p>
       <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-3 text-[11px]">
         <span className="flex items-center gap-1.5 text-white/60">
           <span
@@ -195,6 +258,189 @@ function Odontogram() {
       <p className="mt-2 text-[10px] text-white/30">
         Click en una pieza para cambiar su estado (demo interactiva).
       </p>
+    </div>
+  );
+}
+
+function MiniLineChart({ data, color = GOLD }: { data: number[]; color?: string }) {
+  const w = 280;
+  const h = 80;
+  const pad = 8;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) => {
+    const x = pad + (i * (w - pad * 2)) / (data.length - 1);
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return { x, y };
+  });
+  const pointsStr = points.map((p) => `${p.x},${p.y}`).join(" ");
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-auto max-w-xs">
+      <polyline points={pointsStr} fill="none" stroke={color} strokeWidth={2} />
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={3} fill={color} />
+      ))}
+    </svg>
+  );
+}
+
+const VITALS_HISTORY = [
+  { date: "12/06/2026", presion: "120/80", peso: 74 },
+  { date: "10/04/2026", presion: "118/78", peso: 75 },
+  { date: "15/02/2026", presion: "122/82", peso: 76 },
+  { date: "20/12/2025", presion: "119/79", peso: 77 },
+];
+
+function VitalsHistory() {
+  const weightsChronological = VITALS_HISTORY.map((v) => v.peso).slice().reverse();
+
+  return (
+    <div>
+      <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
+        Evolución de peso
+      </p>
+      <MiniLineChart data={weightsChronological} />
+      <p className="text-white/70 text-xs font-semibold mb-2 mt-4 uppercase tracking-wide">
+        Últimos controles
+      </p>
+      <div className="space-y-1.5">
+        {VITALS_HISTORY.map((v) => (
+          <div
+            key={v.date}
+            className="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-xs gap-2"
+          >
+            <span className="text-white/50 flex-shrink-0">{v.date}</span>
+            <span className="text-white/60">PA: {v.presion}</span>
+            <span className="text-white font-medium">{v.peso} kg</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const BODY_ZONES = [
+  { id: "hombro", label: "Hombro", cx: 132, cy: 70 },
+  { id: "lumbar", label: "Zona lumbar", cx: 100, cy: 150 },
+  { id: "rodilla", label: "Rodilla", cx: 90, cy: 235 },
+  { id: "tobillo", label: "Tobillo", cx: 88, cy: 295 },
+];
+
+function BodyDiagram() {
+  const [affected, setAffected] = useState<Set<string>>(new Set(["hombro"]));
+
+  function toggle(id: string) {
+    setAffected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+      <svg viewBox="0 0 200 320" width={130} height={208} className="flex-shrink-0">
+        <circle cx="100" cy="30" r="20" fill="#2a3f5c" stroke="rgba(255,255,255,0.2)" />
+        <rect x="70" y="55" width="60" height="100" rx="16" fill="#2a3f5c" stroke="rgba(255,255,255,0.2)" />
+        <rect x="55" y="60" width="15" height="90" rx="7" fill="#2a3f5c" stroke="rgba(255,255,255,0.2)" />
+        <rect x="130" y="60" width="15" height="90" rx="7" fill="#2a3f5c" stroke="rgba(255,255,255,0.2)" />
+        <rect x="78" y="155" width="20" height="110" rx="8" fill="#2a3f5c" stroke="rgba(255,255,255,0.2)" />
+        <rect x="102" y="155" width="20" height="110" rx="8" fill="#2a3f5c" stroke="rgba(255,255,255,0.2)" />
+        {BODY_ZONES.map((z) => (
+          <circle
+            key={z.id}
+            cx={z.cx}
+            cy={z.cy}
+            r={11}
+            fill={affected.has(z.id) ? "#c0524a" : GOLD}
+            stroke={SIDEBAR_BG}
+            strokeWidth={2}
+            className="cursor-pointer"
+            onClick={() => toggle(z.id)}
+          />
+        ))}
+      </svg>
+      <div className="flex-1 min-w-0 w-full">
+        <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
+          Zonas en tratamiento
+        </p>
+        <ul className="space-y-1 mb-4">
+          {BODY_ZONES.filter((z) => affected.has(z.id)).map((z) => (
+            <li key={z.id} className="text-white text-xs flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#c0524a" }} />
+              {z.label}
+            </li>
+          ))}
+          {affected.size === 0 && (
+            <li className="text-white/30 text-xs">Sin zonas marcadas.</li>
+          )}
+        </ul>
+        <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
+          Progreso del tratamiento
+        </p>
+        <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden mb-1">
+          <div className="h-full rounded-full" style={{ width: "40%", background: GOLD }} />
+        </div>
+        <p className="text-white/40 text-[10px]">Sesión 4 de 10</p>
+        <p className="mt-2 text-[10px] text-white/30">
+          Click en una zona del cuerpo para marcarla (demo interactiva).
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const WEIGHT_TREND = [82, 80, 79, 78, 77, 76];
+const MACROS = [
+  { label: "Proteínas", pct: 35 },
+  { label: "Carbohidratos", pct: 40 },
+  { label: "Grasas", pct: 25 },
+];
+
+function NutritionProgress() {
+  return (
+    <div>
+      <div className="grid grid-cols-2 gap-3 mb-4 max-w-xs">
+        <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+          <p className="text-[10px] text-white/40">Peso actual</p>
+          <p className="text-white text-lg font-bold">
+            {WEIGHT_TREND[WEIGHT_TREND.length - 1]} kg
+          </p>
+        </div>
+        <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+          <p className="text-[10px] text-white/40">Objetivo</p>
+          <p className="text-white text-lg font-bold">72 kg</p>
+        </div>
+      </div>
+      <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
+        Evolución de peso
+      </p>
+      <MiniLineChart data={WEIGHT_TREND} />
+      <p className="text-white/70 text-xs font-semibold mb-2 mt-4 uppercase tracking-wide">
+        Distribución de macros
+      </p>
+      <div className="space-y-2 max-w-xs">
+        {MACROS.map((m) => (
+          <div key={m.label}>
+            <div className="flex justify-between text-[10px] text-white/50 mb-0.5">
+              <span>{m.label}</span>
+              <span>{m.pct}%</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${m.pct}%`, background: GOLD }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -272,6 +518,7 @@ function MiniCalendar() {
 }
 
 export default function AdminDemo() {
+  const [specialty, setSpecialty] = useState<Specialty>("odontologia");
   const [view, setView] = useState<View>("turnos");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [requests, setRequests] = useState<PendingRequest[]>(INITIAL_REQUESTS);
@@ -308,13 +555,46 @@ export default function AdminDemo() {
     ? HISTORIAL.filter((h) => h.patient === selectedPatient.name)
     : [];
 
+  const selectedPatientNoteIndex = selectedPatient
+    ? PATIENTS.findIndex((p) => p.id === selectedPatient.id)
+    : -1;
+  const selectedPatientNote =
+    selectedPatientNoteIndex >= 0
+      ? SPECIALTY_NOTES[specialty][selectedPatientNoteIndex]
+      : "";
+
   const totalPatients = PATIENTS.length;
   const confirmedToday =
     TODAY_APPOINTMENTS.filter((a) => a.status === "confirmado").length +
     confirmedFromRequests.length;
 
   return (
-    <div className="flex w-full h-full text-sm overflow-hidden" style={{ background: "#152238" }}>
+    <div
+      className="flex flex-col w-full h-full text-sm overflow-hidden"
+      style={{ background: "#152238" }}
+    >
+      <div
+        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 overflow-x-auto border-b border-white/10"
+        style={{ background: SIDEBAR_BG }}
+      >
+        {SPECIALTIES.map((s) => {
+          const active = specialty === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setSpecialty(s.id)}
+              className={`flex-shrink-0 rounded-full px-3 py-1 text-[10px] md:text-xs font-medium transition whitespace-nowrap ${
+                active ? "font-semibold" : "text-white/50 hover:text-white"
+              }`}
+              style={active ? { background: GOLD, color: SIDEBAR_BG } : undefined}
+            >
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex flex-1 min-h-0">
       <aside
         className="w-14 sm:w-40 md:w-48 flex-shrink-0 flex flex-col py-5 px-2 sm:px-3 gap-1"
         style={{ background: SIDEBAR_BG }}
@@ -489,16 +769,19 @@ export default function AdminDemo() {
             </div>
 
             <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
-              Odontograma
+              {SPECIALTY_WIDGET_LABEL[specialty]}
             </p>
             <div className="rounded-lg bg-white/5 border border-white/10 p-4 mb-6">
-              <Odontogram />
+              {specialty === "odontologia" && <Odontogram />}
+              {specialty === "medicina" && <VitalsHistory />}
+              {specialty === "kinesiologia" && <BodyDiagram />}
+              {specialty === "nutricion" && <NutritionProgress />}
             </div>
 
             <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
               Notas
             </p>
-            <p className="text-white/60 text-xs mb-6">{selectedPatient.notes}</p>
+            <p className="text-white/60 text-xs mb-6">{selectedPatientNote}</p>
 
             <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
               Historial de turnos
@@ -569,6 +852,7 @@ export default function AdminDemo() {
             <MiniCalendar />
           </div>
         )}
+      </div>
       </div>
     </div>
   );
