@@ -51,7 +51,7 @@ export default function SocialProofPopup() {
 
   return (
     <div
-      className={`fixed bottom-5 left-5 z-50 max-w-[280px] rounded-lg border-l-[3px] border-gold bg-navy-medium px-4 py-3 shadow-lg ${
+      className={`fixed bottom-[70px] left-4 z-50 max-w-[280px] rounded-lg border-l-[3px] border-gold bg-navy-medium px-4 py-3 shadow-lg md:bottom-6 md:left-6 ${
         visible
           ? "opacity-100 translate-y-0"
           : "opacity-0 translate-y-8 pointer-events-none"
