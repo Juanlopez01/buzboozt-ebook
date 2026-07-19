@@ -16,3 +16,9 @@ body {
     animation: fadeInUp 0.8s ease-out both;
   }
 }
+
+@media (max-width: 768px) {
+  body.has-mobile-cta {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+}

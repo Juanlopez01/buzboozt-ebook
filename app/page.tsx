@@ -14,6 +14,7 @@ import DeviceShowcaseSection from "@/components/landing/DeviceShowcaseSection";
 import FinalPriceSection from "@/components/landing/FinalPriceSection";
 import Footer from "@/components/landing/Footer";
 import RecentPurchaseNotification from "@/components/RecentPurchaseNotification";
+import MobileFloatingCta from "@/components/landing/MobileFloatingCta";
 
 export default function Home() {
   return (
@@ -34,6 +35,7 @@ export default function Home() {
       <FinalPriceSection />
       <Footer />
       <RecentPurchaseNotification />
+      <MobileFloatingCta />
     </>
   );
 }
