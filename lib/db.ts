@@ -10,12 +10,6 @@ export interface Order {
   created_at: string;
 }
 
-export interface RecentOrder {
-  displayName: string;
-  product_type: string;
-  created_at: string;
-}
-
 function getSql() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
@@ -67,41 +61,4 @@ export async function createOrder(order: {
     VALUES (${order.paymentId}, ${order.email}, ${order.productType}, ${order.amount}, ${order.status}, ${order.payerName ?? null})
     ON CONFLICT (payment_id) DO NOTHING;
   `;
-}
-
-// Solo expone nombre + inicial (nunca el email) para uso público en el
-// widget de compras recientes. Devuelve [] si no hay compras reales todavía
-// — nunca hay que rellenar esto con datos inventados.
-export async function getRecentOrders(limit = 10): Promise<RecentOrder[]> {
-  const sql = getSql();
-  await ensureOrdersTable();
-  const rows = (await sql`
-    SELECT payer_name, email, product_type, created_at
-    FROM orders
-    WHERE status = 'approved'
-      AND created_at > now() - interval '7 days'
-    ORDER BY created_at DESC
-    LIMIT ${limit};
-  `) as unknown as Array<{
-    payer_name: string | null;
-    email: string;
-    product_type: string;
-    created_at: string;
-  }>;
-
-  return rows.map((row) => {
-    const name = row.payer_name?.trim();
-    let displayName = "Alguien";
-    if (name) {
-      const parts = name.split(/\s+/);
-      const first = parts[0];
-      const lastInitial = parts[1] ? `${parts[1][0]}.` : "";
-      displayName = [first, lastInitial].filter(Boolean).join(" ");
-    }
-    return {
-      displayName,
-      product_type: row.product_type,
-      created_at: row.created_at,
-    };
-  });
 }

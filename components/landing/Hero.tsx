@@ -22,12 +22,16 @@ export default function Hero() {
           en 12 semanas.
         </h1>
 
-        <p className="text-graylight text-base md:text-lg leading-relaxed mb-10">
+        <p className="text-graylight text-base md:text-lg leading-relaxed">
           — Sin saber de marketing.
           <br />
           — Sin aparecer en cámara.
           <br />
           — Sin invertir miles de pesos.
+        </p>
+
+        <p className="text-gold text-[13px] tracking-[0.5px] mt-3 mb-10">
+          $9.999 ARS · Acceso inmediato · Garantía 7 días
         </p>
 
         <div className="mb-10 w-full max-w-sm">
