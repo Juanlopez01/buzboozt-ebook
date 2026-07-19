@@ -4,17 +4,17 @@ import LastSpotsBadge from "@/components/landing/LastSpotsBadge";
 
 const CARDS = [
   {
-    image: "/lifestyle-1.jpg",
+    image: "/doctor-frustrated.jpg",
     title: "Cansado de improvisar",
     subtitle: "Tu consultorio vacío",
   },
   {
-    image: "/lifestyle-2.jpg",
+    image: "/hero-doctor.jpg",
     title: "Organizá tu presencia",
     subtitle: "Sistema digital en orden",
   },
   {
-    image: "/lifestyle-3.jpg",
+    image: "/waiting-room.jpg",
     title: "Ahorrá tiempo",
     subtitle: "Turnos que llegan solos",
   },
