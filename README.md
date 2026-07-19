@@ -142,10 +142,9 @@ integrado vía MercadoPago.
 - `components/landing/WebServiceSection.tsx` — sección de venta del
   servicio de desarrollo web ($150.000), con CTA directo a WhatsApp (no
   pasa por MercadoPago, es una venta por consulta).
-- `components/RecentPurchaseNotification.tsx` + `app/api/recent-orders/route.ts`
-  — widget flotante de "compra reciente" **basado 100% en ventas reales**
-  de la tabla `orders` (nunca en datos inventados). Si todavía no hubo
-  ninguna venta, no muestra nada — no rellena con ejemplos falsos.
+- `components/landing/SocialProofPopup.tsx` — widget flotante de "compra
+  reciente" con una lista fija de nombres/ciudades de ejemplo que rota
+  cada 30s (no está conectado a la tabla `orders`).
 - `components/landing/LastSpotsBadge.tsx` — badge genérico de urgencia
   ("Últimos cupos a este precio"), sin contador numérico inventado.
 

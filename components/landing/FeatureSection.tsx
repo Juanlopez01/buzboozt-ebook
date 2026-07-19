@@ -20,10 +20,10 @@ export default function FeatureSection() {
     <section className="bg-navy-medium px-6 py-20 fade-in-section">
       <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <Image
-          src="/feature-presencia-digital.jpg"
+          src="/nutritionist.jpg"
           alt="Organizá tu presencia digital"
-          width={1600}
-          height={1195}
+          width={1024}
+          height={1024}
           sizes="(min-width: 768px) 50vw, 100vw"
           className="w-full h-auto rounded-xl border border-gold/20"
         />

@@ -11,7 +11,10 @@ const INCLUDES = [
 
 export default function FinalPriceSection() {
   return (
-    <section className="px-6 py-24 fade-in-section bg-gradient-to-b from-navy to-navy-medium">
+    <section
+      id="precio-final"
+      className="px-6 py-24 fade-in-section bg-gradient-to-b from-navy to-navy-medium"
+    >
       <div className="mx-auto max-w-lg text-center">
         <div className="mb-10 w-full max-w-xs mx-auto">
           <Image

@@ -13,7 +13,8 @@ import FaqSection from "@/components/landing/FaqSection";
 import DeviceShowcaseSection from "@/components/landing/DeviceShowcaseSection";
 import FinalPriceSection from "@/components/landing/FinalPriceSection";
 import Footer from "@/components/landing/Footer";
-import RecentPurchaseNotification from "@/components/RecentPurchaseNotification";
+import SocialProofPopup from "@/components/landing/SocialProofPopup";
+import MobileFloatingCta from "@/components/landing/MobileFloatingCta";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
       <UrgencyBar />
       <Hero />
       <QualifySection />
+      <TestimonialsSection />
       <LifestyleSection />
       <FeatureSection />
       <LearnSection />
@@ -28,12 +30,12 @@ export default function Home() {
       <BonusesSection />
       <UpsellSection />
       <WebServiceSection />
-      <TestimonialsSection />
       <FaqSection />
       <DeviceShowcaseSection />
       <FinalPriceSection />
       <Footer />
-      <RecentPurchaseNotification />
+      <SocialProofPopup />
+      <MobileFloatingCta />
     </>
   );
 }
