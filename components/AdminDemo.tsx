@@ -445,8 +445,18 @@ function NutritionProgress() {
   );
 }
 
+const AGENDA_TIMES = ["09:00", "10:30", "11:00", "14:00", "15:30", "16:30", "17:00"];
+const AGENDA_TYPES = ["Control", "Consulta", "Limpieza", "Seguimiento", "Primera consulta"];
+
+interface DayAppointment {
+  time: string;
+  patient: string;
+  type: string;
+}
+
 function MiniCalendar() {
   const [offset, setOffset] = useState(0);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const base = new Date(2026, 6, 1);
   const ref = new Date(base.getFullYear(), base.getMonth() + offset, 1);
   const year = ref.getFullYear();
@@ -467,6 +477,19 @@ function MiniCalendar() {
     return set;
   }, [daysInMonth]);
 
+  const dayAppointments = useMemo<DayAppointment[]>(() => {
+    if (selectedDay === null || !markedDays.has(selectedDay)) return [];
+    const count = (selectedDay % 3) + 1;
+    const items: DayAppointment[] = [];
+    for (let i = 0; i < count; i++) {
+      const patient = PATIENTS[(selectedDay + i) % PATIENTS.length];
+      const time = AGENDA_TIMES[(selectedDay + i * 2) % AGENDA_TIMES.length];
+      const type = AGENDA_TYPES[(selectedDay + i) % AGENDA_TYPES.length];
+      items.push({ time, patient: patient.name, type });
+    }
+    return items.sort((a, b) => a.time.localeCompare(b.time));
+  }, [selectedDay, markedDays]);
+
   const cells: (number | null)[] = [
     ...Array(firstWeekday).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
@@ -476,7 +499,10 @@ function MiniCalendar() {
     <div>
       <div className="flex items-center justify-between mb-3">
         <button
-          onClick={() => setOffset((o) => o - 1)}
+          onClick={() => {
+            setOffset((o) => o - 1);
+            setSelectedDay(null);
+          }}
           className="text-white/50 hover:text-white px-2"
           aria-label="Mes anterior"
         >
@@ -484,7 +510,10 @@ function MiniCalendar() {
         </button>
         <p className="text-sm font-semibold text-white capitalize">{monthLabel}</p>
         <button
-          onClick={() => setOffset((o) => o + 1)}
+          onClick={() => {
+            setOffset((o) => o + 1);
+            setSelectedDay(null);
+          }}
           className="text-white/50 hover:text-white px-2"
           aria-label="Mes siguiente"
         >
@@ -496,22 +525,67 @@ function MiniCalendar() {
           <div key={d}>{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map((d, i) => (
-          <div
-            key={i}
-            className={`aspect-square flex items-center justify-center rounded-md text-[11px] ${
-              d === null ? "" : markedDays.has(d) ? "font-bold" : "text-white/60 bg-white/5"
-            }`}
-            style={
-              d !== null && markedDays.has(d)
-                ? { background: GOLD, color: SIDEBAR_BG }
-                : undefined
-            }
-          >
-            {d ?? ""}
+      <div className="grid grid-cols-7 gap-1 mb-4">
+        {cells.map((d, i) => {
+          const isMarked = d !== null && markedDays.has(d);
+          const isSelected = d !== null && d === selectedDay;
+          return (
+            <button
+              key={i}
+              onClick={() => d !== null && setSelectedDay(d)}
+              disabled={d === null}
+              className={`aspect-square flex items-center justify-center rounded-md text-[11px] transition ${
+                d === null
+                  ? "cursor-default"
+                  : isMarked
+                    ? "font-bold"
+                    : "text-white/60 bg-white/5 hover:bg-white/10"
+              } ${isSelected ? "ring-2" : ""}`}
+              style={{
+                ...(isMarked ? { background: GOLD, color: SIDEBAR_BG } : undefined),
+                ...(isSelected ? { boxShadow: `0 0 0 2px ${GOLD}` } : undefined),
+              }}
+            >
+              {d ?? ""}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="border-t border-white/10 pt-3">
+        {selectedDay === null ? (
+          <p className="text-white/30 text-xs">
+            Tocá un día para ver los turnos.
+          </p>
+        ) : dayAppointments.length === 0 ? (
+          <p className="text-white/30 text-xs">
+            No hay turnos el día {selectedDay}.
+          </p>
+        ) : (
+          <div>
+            <p className="text-white/70 text-xs font-semibold mb-2 uppercase tracking-wide">
+              Turnos del día {selectedDay}
+            </p>
+            <div className="space-y-1.5">
+              {dayAppointments.map((a, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-3 py-2"
+                >
+                  <span className="text-white/50 text-xs w-10 flex-shrink-0">
+                    {a.time}
+                  </span>
+                  <span className="text-white text-xs md:text-sm truncate">
+                    {a.patient}
+                  </span>
+                  <span className="text-white/40 text-[10px] md:text-xs truncate ml-auto">
+                    {a.type}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
