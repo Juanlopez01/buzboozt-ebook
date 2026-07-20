@@ -128,6 +128,9 @@ integrado vía MercadoPago.
 - `app/gracias`, `app/error`, `app/pendiente` — páginas de retorno post-pago
   (`back_urls` de MercadoPago). `/gracias` además verifica el pago
   server-side y dispara el evento `Purchase` de Meta Pixel.
+- `app/demo/page.tsx` — página standalone con el panel `AdminDemo` a
+  pantalla casi completa (pensada para compartir como link directo en
+  ventas), con CTA a WhatsApp al final.
 - `components/CheckoutButton.tsx` — botón client-side que llama a
   `/api/checkout` y redirige al usuario.
 - `components/MetaPixel.tsx` — script base del Meta Pixel (se inyecta en
